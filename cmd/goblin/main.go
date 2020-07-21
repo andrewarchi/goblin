@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/ReconfigureIO/goblin"
+	"github.com/GaloisInc/goblin"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -56,7 +56,7 @@ func main() {
 		if *builtinDumpFlag {
 			ast.Print(fset, f)
 		} else {
-			val, _ := goblin.DumpFile(f, fset)
+			val, _ := json.Marshal(goblin.DumpFile(f, *fileFlag, fset, nil))
 			os.Stdout.Write(val)
 		}
 	} else if *exprFlag != "" {
@@ -69,3 +69,4 @@ func main() {
 		flag.PrintDefaults()
 	}
 }
+ 
