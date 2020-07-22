@@ -4,10 +4,15 @@ Goblin
 [![Build Status](https://travis-ci.org/ReconfigureIO/goblin.svg?branch=master)](https://travis-ci.org/ReconfigureIO/goblin)
 [![codecov.io](https://codecov.io/github/ReconfigureIO/goblin/branch/master/graph/badge.svg)](https://codecov.io/github/ReconfigureIO/goblin)
 
-This is a fork of `goblin` extended to include type information with the emitted ASTs. Differences from the original:
+This is a fork of `goblin` extended to include type information with the emitted ASTs.
+
+Differences from the original:
 * DumpFile takes two more arguments: a file path string and a [*types.Info](https://golang.org/pkg/go/types/#Info). The latter is optional (pass nil for no type information).
 * The "kind" and "type" fields of binary and unary expression nodes are swapped.
 * Bugfixes.
+
+Known issues:
+* Can't handle recursive types yet (causes stack overflow).
 
 ##
 
