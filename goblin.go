@@ -191,13 +191,38 @@ func DumpIdent(i *ast.Ident, fset *token.FileSet) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
+	
+	identKind := "none"
+	if tinfo != nil {
+		o := tinfo.Uses[i]
+		switch o.(type) {
+		case *types.Builtin:
+			identKind = "Builtin"
+		case *types.Const:
+			identKind = "Const"
+		case *types.Func:
+			identKind = "Func"
+		case *types.Label:
+			identKind = "Label"
+		case *types.Nil:
+			identKind = "Nil"
+		case *types.PkgName:
+			identKind = "PkgName"
+		case *types.TypeName:
+			identKind = "TypeName"
+		case *types.Var:
+			identKind = "Var"
+		default: // o is nil
+		}
+	}
 
+	// This stuff only applies when type information isn't
+	// available. Otherwise literals are handled by AttemptConst.
 	asLiteral := map[string]interface{}{
 		"kind":     "literal",
 		"type":     "BOOL",
 		"position": DumpPosition(fset.Position(i.Pos())),
 	}
-
 	switch i.Name {
 	case "true":
 		asLiteral["value"] = "true"
@@ -214,9 +239,10 @@ func DumpIdent(i *ast.Ident, fset *token.FileSet) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"kind":     "ident",
-		"value":    i.Name,
-		"position": DumpPosition(fset.Position(i.Pos())),
+		"kind":       "ident",
+		"ident-kind": identKind,
+		"value":      i.Name,
+		"position":   DumpPosition(fset.Position(i.Pos())),
 	}
 }
 
@@ -227,6 +253,13 @@ func DumpArray(a *ast.ArrayType, fset *token.FileSet) map[string]interface{} {
 		"element":  DumpExprAsType(a.Elt, fset),
 		"position": DumpPosition(fset.Position(a.Pos())),
 	}
+}
+
+func withType(o map[string]interface{}, tp map[string]interface{}) map[string]interface{} {
+	if tp != nil {
+		o["go-type"] = tp
+	}
+	return o
 }
 
 func AttemptExprAsType(e ast.Expr, fset *token.FileSet) map[string]interface{} {
@@ -241,13 +274,12 @@ func AttemptExprAsType(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 	tp := getGoType(e)
 
 	if n, ok := e.(*ast.Ident); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "type",
 			"type":     "identifier",
 			"value":    DumpIdent(n, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.SelectorExpr); ok {
@@ -401,12 +433,11 @@ func AttemptConst(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 		return nil
 	}
 
-	lit := map[string]interface{}{
+	lit := withType(map[string]interface{}{
 		"kind":     "literal",
 		"value":    value.ExactString(),
 		"position": DumpPosition(fset.Position(e.Pos())),
-		"go-type":  tp, // TODO: this should always be an "untyped" type.. need to verify
-	}
+	}, tp)
 
 	switch value.Kind() {
 	case constant.Bool:
@@ -449,28 +480,26 @@ func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 			return val
 		}
 
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "identifier",
 			"value":    val,
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.Ellipsis); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":  "expression",
 			"type":  "ellipsis",
 			"value": DumpExpr(n.Elt, fset),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	// is this the right place??
 	if n, ok := e.(*ast.FuncLit); ok {
 		variadic := ExtractVariadic(n.Type.Params)
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "literal",
 			"type":     "function",
 			"params":   DumpFields(n.Type.Params, fset),
@@ -478,8 +507,7 @@ func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 			"results":  DumpFields(n.Type.Results, fset),
 			"body":     DumpBlock(n.Body, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.BasicLit); ok {
@@ -492,46 +520,42 @@ func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 		// inner composites an implicit type:
 		// bool[][] { { false, true }, { true, false }}
 
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "literal",
 			"type":     "composite",
 			"declared": AttemptExprAsType(n.Type, fset),
 			"values":   DumpExprs(n.Elts, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if b, ok := e.(*ast.BinaryExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "binary",
 			"left":     DumpExpr(b.X, fset),
 			"right":    DumpExpr(b.Y, fset),
 			"operator": b.Op.String(),
 			"position": DumpPosition(fset.Position(b.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.IndexExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "index",
 			"target":   DumpExpr(n.X, fset),
 			"index":    DumpExpr(n.Index, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.StarExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":   "expression",
 			"type":   "star",
 			"target": DumpExpr(n.X, fset),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.CallExpr); ok {
@@ -539,13 +563,12 @@ func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 	}
 
 	if n, ok := e.(*ast.ParenExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "paren",
 			"target":   DumpExpr(n.X, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.SelectorExpr); ok {
@@ -554,53 +577,62 @@ func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 		// assume that this is a qualified expression rather than a method call.
 		// this is not correct in all cases, but ensuring correctness is outside
 		// of the scope of a lowly parser such as goblin.
-		// if lhs["type"] == "identifier" && lhs["qualifier"] == nil {
-		// 	return map[string]interface{}{
-		// 		"kind":      "expression",
-		// 		"type":      "identifier",
-		// 		"qualifier": lhs["value"],
-		// 		"value":     DumpIdent(n.Sel, fset),
-		// 		"position":  DumpPosition(fset.Position(e.Pos())),
-		// 		"go-type":  DumpGoType(tv.Type),
-		// 	}
-		// }
+		// NOTE: this heuristic is only used when no type information is available.
+		if tinfo == nil && lhs["type"] == "identifier" && lhs["qualifier"] == nil {
+			return map[string]interface{}{
+				"kind":      "expression",
+				"type":      "identifier",
+				"qualifier": lhs["value"],
+				"value":     DumpIdent(n.Sel, fset),
+				"position":  DumpPosition(fset.Position(e.Pos())),
+			}
+		}
 
-		// TODO: switch on go type to disambiguate?
+		// If the lhs denotes a package name, this is a qualified identifier.
+		if lhs["type"] == "identifier" {
+			if lhs["value"].(map[string]interface{})["ident-kind"] == "PkgName" {
+				return withType(map[string]interface{}{
+					"kind":      "expression",
+					"type":      "identifier",
+					"qualifier": lhs["value"],
+					"value":     DumpIdent(n.Sel, fset),
+					"position":  DumpPosition(fset.Position(e.Pos())),
+				}, tp)
+			}
+		}
 
-		return map[string]interface{}{
+		// Otherwise it's a field/method selector.
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "selector",
 			"target":   lhs,
 			"field":    DumpIdent(n.Sel, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.TypeAssertExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "type-assert",
 			"target":   DumpExpr(n.X, fset),
 			"asserted": AttemptExprAsType(n.Type, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.UnaryExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "unary",
 			"target":   DumpExpr(n.X, fset),
 			"operator": n.Op.String(),
 			"position": DumpPosition(fset.Position(n.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.SliceExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "expression",
 			"type":     "slice",
 			"target":   DumpExpr(n.X, fset),
@@ -609,18 +641,16 @@ func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 			"max":      DumpExpr(n.Max, fset),
 			"three":    n.Slice3,
 			"position": DumpPosition(fset.Position(e.Pos())),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.KeyValueExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":  "expression",
 			"type":  "key-value",
 			"key":   DumpExpr(n.Key, fset),
 			"value": DumpExpr(n.Value, fset),
-			"go-type":  tp,
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.BadExpr); ok {
@@ -671,13 +701,12 @@ func DumpBasicLit(l *ast.BasicLit, fset *token.FileSet) map[string]interface{} {
 		return nil
 	}
 
-	return map[string]interface{}{
+	return withType(map[string]interface{}{
 		"kind":     "literal",
 		"type":     l.Kind.String(),
 		"value":    l.Value,
 		"position": DumpPosition(fset.Position(l.Pos())),
-		"go-type":  TokenGoType(l.Kind),
-	}
+	}, DumpGoType(TokenGoType(l.Kind)))
 }
 
 func AttemptField (f *ast.Field, fset *token.FileSet) map[string]interface{} {
@@ -761,24 +790,22 @@ func DumpCall(c *ast.CallExpr, fset *token.FileSet) map[string]interface{} {
 
 	if callee, ok := c.Fun.(*ast.Ident); ok {
 		if callee.Name == "new" {
-			return map[string]interface{}{
+			return withType(map[string]interface{}{
 				"kind":     "expression",
 				"type":     "new",
 				"argument": DumpExprAsType(c.Args[0], fset),
 				"position": DumpPosition(fset.Position(c.Pos())),
-				"go-type":  tp,
-			}
+			}, tp)
 		}
 
 		if callee.Name == "make" {
-			return map[string]interface{}{
+			return withType(map[string]interface{}{
 				"kind":     "expression",
 				"type":     "make",
 				"argument": DumpExprAsType(c.Args[0], fset),
 				"rest":     DumpExprs(c.Args[1:], fset),
 				"position": DumpPosition(fset.Position(c.Pos())),
-				"go-type":  tp,
-			}
+			}, tp)
 		}
 	}
 
@@ -790,14 +817,13 @@ func DumpCall(c *ast.CallExpr, fset *token.FileSet) map[string]interface{} {
 	// as function calls and disambiguate them at a further stage.
 	callee := AttemptExprAsType(c.Fun, fset)
 	if callee != nil && callee["type"] != "identifier" {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":       "expression",
 			"type":       "cast",
 			"target":     DumpExpr(c.Args[0], fset),
 			"coerced-to": callee,
 			"position":   DumpPosition(fset.Position(c.Pos())),
-			"go-type":    tp,
-		}
+		}, tp)
 	}
 
 	// TODO: switch on the actual type here to disambiguate
@@ -807,15 +833,14 @@ func DumpCall(c *ast.CallExpr, fset *token.FileSet) map[string]interface{} {
 
 	// callee := DumpExpr(c.Fun, fset)
 
-	return map[string]interface{}{
+	return withType(map[string]interface{}{
 		"kind":      "expression",
 		"type":      "call",
 		"function":  DumpExpr(c.Fun, fset),
 		"arguments": DumpExprs(c.Args, fset),
 		"ellipsis":  c.Ellipsis != token.NoPos,
 		"position":  DumpPosition(fset.Position(c.Pos())),
-		"go-type":  tp,
-	}
+	}, tp)
 }
 
 func DumpImport(spec *ast.ImportSpec, fset *token.FileSet) map[string]interface{} {
