@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"log"
 )
 
 // Assuming you build with `make`, this variable will be filled in automatically
@@ -21,9 +22,9 @@ func main() {
 	fileFlag := flag.String("file", "", "file to parse")
 	stmtFlag := flag.String("stmt", "", "statement to parse")
 	exprFlag := flag.String("expr", "", "expression to parse")
+	fullFlag := flag.Bool("f", false, "parse and typecheck all imports (with file option)")
 
 	flag.Parse()
-	// Create the AST by parsing src.
 	fset := token.NewFileSet() // positions are relative to fset
 
 	if *panicFlag {
@@ -34,30 +35,40 @@ func main() {
 		println(version)
 		return
 	} else if *fileFlag != "" {
-		file, err := os.Open(*fileFlag)
-		if err != nil {
-			goblin.Perish(goblin.TOPLEVEL_POSITION, "path_error", err.Error())
-		}
-		info, err := file.Stat()
-		if err != nil {
-			goblin.Perish(goblin.TOPLEVEL_POSITION, "path_error", err.Error())
-		}
-
-		size := info.Size()
-		file.Close()
-
-		fset.AddFile(*fileFlag, -1, int(size))
-
-		f, err := parser.ParseFile(fset, *fileFlag, nil, parser.ParseComments)
-		if err != nil {
-			goblin.Perish(goblin.INVALID_POSITION, "positionless_syntax_error", err.Error())
-		}
-
-		if *builtinDumpFlag {
-			ast.Print(fset, f)
+		// If full, use Load 
+		if *fullFlag {
+			o := goblin.Load(*fileFlag)
+			str, err := json.Marshal(o)
+			if (err != nil) {
+				log.Fatal(err)
+			}
+			os.Stdout.Write(str)
 		} else {
-			val, _ := json.Marshal(goblin.DumpFile(f, *fileFlag, fset, nil))
-			os.Stdout.Write(val)
+			file, err := os.Open(*fileFlag)
+			if err != nil {
+				goblin.Perish(goblin.TOPLEVEL_POSITION, "path_error", err.Error())
+			}
+			info, err := file.Stat()
+			if err != nil {
+				goblin.Perish(goblin.TOPLEVEL_POSITION, "path_error", err.Error())
+			}
+			
+			size := info.Size()
+			file.Close()
+			
+			fset.AddFile(*fileFlag, -1, int(size))
+			
+			f, err := parser.ParseFile(fset, *fileFlag, nil, parser.ParseComments)
+			if err != nil {
+				goblin.Perish(goblin.INVALID_POSITION, "positionless_syntax_error", err.Error())
+			}
+			
+			if *builtinDumpFlag {
+				ast.Print(fset, f)
+			} else {
+				val, _ := json.Marshal(goblin.DumpFile(f, *fileFlag, fset, nil))
+				os.Stdout.Write(val)
+			}
 		}
 	} else if *exprFlag != "" {
 		val, _ := json.Marshal(goblin.TestExpr(*exprFlag))
@@ -69,4 +80,4 @@ func main() {
 		flag.PrintDefaults()
 	}
 }
- 
+

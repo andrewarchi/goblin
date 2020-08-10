@@ -1,16 +1,17 @@
 package goblin
 
 import (
-	"fmt"
-	"os"
-	"reflect"
-	"strings"
 	"encoding/json"
+	"fmt"
 	"go/ast"
 	"go/constant"
 	"go/parser"
 	"go/token"
 	"go/types"
+	"os"
+	"reflect"
+	"strings"
+	// "strconv"
 )
 
 var ShouldPanic bool = false
@@ -61,7 +62,7 @@ func DumpVar(v *types.Var) map[string]interface{} {
 	if v == nil {
 		return nil
 	}
-	return map[string]interface{} {
+	return map[string]interface{}{
 		"name": v.Id(),
 	}
 }
@@ -87,84 +88,91 @@ func getGoType(e ast.Expr) map[string]interface{} {
 	}
 }
 
-func DumpGoType(tp types.Type) map[string]interface{} {
+// Impose a depth limit for now until we can detect and handle
+// recursive types properly.
+const TYPE_DEPTH_LIMIT int = 100
+
+func dumpGoTypeAux(tp types.Type, d int) map[string]interface{} {
 	if tp == nil {
 		return nil
 	}
 
+	if d > TYPE_DEPTH_LIMIT {
+		panic("dumpGoTypeAux: depth limit exceeded")
+	}
+
 	switch t := tp.(type) {
 	case *types.Array:
-		return map[string]interface{} {
+		return map[string]interface{}{
 			"type": "Array",
-			"elem": DumpGoType(t.Elem()),
+			"elem": dumpGoTypeAux(t.Elem(), d+1),
 			"len":  t.Len(),
 		}
 	case *types.Basic:
-		return map[string]interface{} {
+		return map[string]interface{}{
 			"type": "Basic",
 			"kind": BasicKindToString(t.Kind()),
 		}
 	case *types.Chan:
-		return map[string]interface{} {
-			"type": "Chan",
+		return map[string]interface{}{
+			"type":      "Chan",
 			"direction": DumpChanDir(ConvertChanDir(t.Dir())),
-			"elem": DumpGoType(t.Elem()),	
+			"elem":      dumpGoTypeAux(t.Elem(), d+1),
 		}
 	case *types.Interface:
 		// TODO: may need to call Complete() on t before doing this.
 		methods := make([]map[string]interface{}, t.NumMethods())
 		for i := 0; i < t.NumMethods(); i++ {
 			m := t.Method(i)
-			methods[i] = map[string]interface{} {
+			methods[i] = map[string]interface{}{
 				"name": m.Name(),
-				"type": DumpGoType(m.Type()),
+				"type": dumpGoTypeAux(m.Type(), d+1),
 			}
 		}
-		return map[string]interface{} {
-			"type": "Interface",
+		return map[string]interface{}{
+			"type":    "Interface",
 			"methods": methods,
 		}
 	case *types.Map:
-		return map[string]interface{} {
+		return map[string]interface{}{
 			"type": "Map",
-			"key": DumpGoType(t.Key()),
-			"elem": DumpGoType(t.Elem()),
+			"key":  dumpGoTypeAux(t.Key(), d+1),
+			"elem": dumpGoTypeAux(t.Elem(), d+1),
 		}
 	case *types.Named:
-		return map[string]interface{} {
-			"type": "Named",
-			// TODO: not sure about this
-			"underlying": DumpGoType(t.Underlying()),
+		return map[string]interface{}{
+			"type":       "Named",
+			"underlying": dumpGoTypeAux(t.Underlying(), d+1),
 		}
 	case *types.Pointer:
-		return map[string]interface{} {
+		return map[string]interface{}{
 			"type": "Pointer",
-			"elem": DumpGoType(t.Elem()),
+			"elem": dumpGoTypeAux(t.Elem(), d+1),
 		}
 	case *types.Signature:
-		return map[string]interface{} {
-			"type": "Signature",
-			"params": DumpGoType(t.Params()),
-			"recv": DumpVar(t.Recv()),
-			"results": DumpGoType(t.Results()),
+		return map[string]interface{}{
+			"type":     "Signature",
+			"params":   dumpGoTypeAux(t.Params(), d+1),
+			"recv":     DumpVar(t.Recv()),
+			"results":  dumpGoTypeAux(t.Results(), d+1),
 			"variadic": t.Variadic(),
 		}
 	case *types.Slice:
-		return map[string]interface{} {
+		return map[string]interface{}{
 			"type": "Slice",
-			"elem": DumpGoType(t.Elem()),
+			"elem": dumpGoTypeAux(t.Elem(), d+1),
 		}
 	case *types.Struct:
 		fields := make([]map[string]interface{}, t.NumFields())
 		for i := 0; i < t.NumFields(); i++ {
 			f := t.Field(i)
-			fields[i] = map[string]interface{} {
+			fields[i] = map[string]interface{}{
 				"name": f.Name(),
-				"type": DumpGoType(f.Type()),
+				"type": dumpGoTypeAux(f.Type(), d+1),
 			}
 		}
-		return map[string]interface{} {
-			"type": "Struct",
+		return map[string]interface{}{
+			"type":   "Struct",
 			"fields": fields,
 			// omit field tags for now
 		}
@@ -172,49 +180,57 @@ func DumpGoType(tp types.Type) map[string]interface{} {
 		fields := make([]map[string]interface{}, t.Len())
 		for i := 0; i < t.Len(); i++ {
 			f := t.At(i)
-			fields[i] = map[string]interface{} {
+			fields[i] = map[string]interface{}{
 				"name": f.Name(),
-				"type": DumpGoType(f.Type()),
+				"type": dumpGoTypeAux(f.Type(), d+1),
 			}
 		}
-		return map[string]interface{} {
-			"type": "Tuple",
+		return map[string]interface{}{
+			"type":   "Tuple",
 			"fields": fields,
 		}
 	default:
-		fmt.Println("DumpGoType: unknown go type: ", tp)
+		fmt.Println("dumpGoTypeAux: unknown go type: ", tp)
 		panic("")
 	}
+}
+
+func DumpGoType(tp types.Type) map[string]interface{} {
+	return dumpGoTypeAux(tp, 0)
+}
+
+func IdentKind(ident *ast.Ident) string {
+	if tinfo != nil {
+		o := tinfo.Uses[ident]
+		switch o.(type) {
+		case *types.Builtin:
+			return "Builtin"
+		case *types.Const:
+			return "Const"
+		case *types.Func:
+			return "Func"
+		case *types.Label:
+			return "Label"
+		case *types.Nil:
+			return "Nil"
+		case *types.PkgName:
+			return "PkgName"
+		case *types.TypeName:
+			return "TypeName"
+		case *types.Var:
+			return "Var"
+		default: // o is nil
+		}
+	}
+	return "NoKind"
 }
 
 func DumpIdent(i *ast.Ident, fset *token.FileSet) map[string]interface{} {
 	if i == nil {
 		return nil
 	}
-	
-	identKind := "none"
-	if tinfo != nil {
-		o := tinfo.Uses[i]
-		switch o.(type) {
-		case *types.Builtin:
-			identKind = "Builtin"
-		case *types.Const:
-			identKind = "Const"
-		case *types.Func:
-			identKind = "Func"
-		case *types.Label:
-			identKind = "Label"
-		case *types.Nil:
-			identKind = "Nil"
-		case *types.PkgName:
-			identKind = "PkgName"
-		case *types.TypeName:
-			identKind = "TypeName"
-		case *types.Var:
-			identKind = "Var"
-		default: // o is nil
-		}
-	}
+
+	identKind := IdentKind(i)
 
 	// This stuff only applies when type information isn't
 	// available. Otherwise literals are handled by AttemptConst.
@@ -285,102 +301,109 @@ func AttemptExprAsType(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 	if n, ok := e.(*ast.SelectorExpr); ok {
 		lhs := DumpExpr(n.X, fset)
 
-		if lhs["type"] == "identifier" && lhs["qualifier"] == nil {
-			return map[string]interface{}{
+		is_type := false
+		if tinfo != nil {
+			is_type = IdentKind(n.Sel) == "TypeName"
+		} else {
+			is_type = lhs["type"] == "identifier" && lhs["qualifier"] == nil
+		}
+
+		if is_type {
+			return withType(map[string]interface{}{
 				"kind":      "type",
 				"type":      "identifier",
 				"qualifier": lhs["value"],
 				"value":     DumpIdent(n.Sel, fset),
 				"position":  DumpPosition(fset.Position(e.Pos())),
-			}
+			}, tp)
 		}
 	}
 
 	if n, ok := e.(*ast.ArrayType); ok {
 		if n.Len == nil {
-			return map[string]interface{}{
+			return withType(map[string]interface{}{
 				"kind":     "type",
 				"type":     "slice",
 				"element":  DumpExprAsType(n.Elt, fset),
 				"position": DumpPosition(fset.Position(e.Pos())),
-			}
+			}, tp)
 		} else {
-			return map[string]interface{}{
+			return withType(map[string]interface{}{
 				"kind":     "type",
 				"type":     "array",
 				"element":  DumpExprAsType(n.Elt, fset),
 				"length":   DumpExpr(n.Len, fset),
 				"position": DumpPosition(fset.Position(e.Pos())),
-			}
+			}, tp)
 		}
 	}
 
 	if n, ok := e.(*ast.StarExpr); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":      "type",
 			"type":      "pointer",
 			"contained": DumpExprAsType(n.X, fset),
 			"position":  DumpPosition(fset.Position(e.Pos())),
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.InterfaceType); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":       "type",
 			"type":       "interface",
 			"incomplete": n.Incomplete,
 			"methods":    DumpFields(n.Methods, fset),
 			"position":   DumpPosition(fset.Position(e.Pos())),
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.MapType); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "type",
 			"type":     "map",
 			"key":      DumpExprAsType(n.Key, fset),
 			"value":    DumpExprAsType(n.Value, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.ChanType); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":      "type",
 			"type":      "chan",
 			"direction": DumpChanDir(n.Dir),
 			"value":     DumpExprAsType(n.Value, fset),
 			"position":  DumpPosition(fset.Position(e.Pos())),
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.StructType); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "type",
 			"type":     "struct",
 			"fields":   DumpFields(n.Fields, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.FuncType); ok {
 		variadic := ExtractVariadic(n.Params)
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":     "type",
 			"type":     "function",
 			"params":   DumpFields(n.Params, fset),
 			"variadic": AttemptField(variadic, fset),
 			"results":  DumpFields(n.Results, fset),
 			"position": DumpPosition(fset.Position(e.Pos())),
-		}
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.Ellipsis); ok {
-		return map[string]interface{}{
+		return withType(map[string]interface{}{
 			"kind":  "type",
 			"type":  "ellipsis",
 			"value": DumpExprAsType(n.Elt, fset),
-		}
+		}, tp)
 	}
 
 	return nil
@@ -421,8 +444,17 @@ func DumpChanDir(d ast.ChanDir) string {
 	panic("unreachable")
 }
 
+func isBasicFloat(ty types.Type) bool {
+	switch t := ty.(type) {
+	case *types.Basic:
+		return t.Kind() == types.Float32 || t.Kind() == types.Float64
+	default:
+		return false
+	}
+}
 
-// Dump constant values as BasicLits.
+// Dump constant values as BasicConstExprs. Only possible when type
+// information is available.
 func AttemptConst(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 	tp := getGoType(e)
 	if tp == nil {
@@ -433,29 +465,56 @@ func AttemptConst(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 		return nil
 	}
 
-	lit := withType(map[string]interface{}{
-		"kind":     "literal",
-		"value":    value.ExactString(),
+	// Float literals end up being represented by integer
+	// constants when possible. Here we convert them back to
+	// floats.
+	if isBasicFloat(tinfo.Types[e].Type) {
+		value = constant.ToFloat(value)
+	}
+
+	return withType(map[string]interface{}{
+		"kind":     "constant",
+		"value":    DumpConstant(value),
 		"position": DumpPosition(fset.Position(e.Pos())),
 	}, tp)
+}
 
+func DumpConstant(value constant.Value) map[string]interface{} {
 	switch value.Kind() {
 	case constant.Bool:
-		lit["type"] = "BOOL"
+		return map[string]interface{}{
+			"type": "BOOL",
+			"value": value.ExactString(),
+		}
 	case constant.String:
-		lit["type"] = "STRING"
+		return map[string]interface{}{
+			"type": "STRING",
+			"value": value.ExactString(),
+		}
 	case constant.Int:
-		lit["type"] = "INT"
+		return map[string]interface{}{
+			"type": "INT",
+			"value": value.ExactString(),
+		}
 	case constant.Float:
-		lit["type"] = "FLOAT"
+		return map[string]interface{}{
+			"type": "FLOAT",
+			"numerator": DumpConstant(constant.Num(value)),
+			"denominator": DumpConstant(constant.Denom(value)),
+		}
 	case constant.Complex:
-		lit["type"] = "COMPLEX"
+		return map[string]interface{}{
+			"type": "COMPLEX",
+			"numerator": DumpConstant(constant.Num(value)),
+			"denominator": DumpConstant(constant.Denom(value)),
+		}
 	case constant.Unknown:
 	default:
 		return nil
 	}
-	return lit
+	return nil
 }
+
 
 func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 	if e == nil {
@@ -674,7 +733,7 @@ func DumpExprs(exprs []ast.Expr, fset *token.FileSet) []interface{} {
 
 // Given a token associated with a basic literal, return the BasicKind
 // of its corresponding basic type.
-func TokenBasicKind (tok token.Token) types.BasicKind {
+func TokenBasicKind(tok token.Token) types.BasicKind {
 	// token.INT, token.FLOAT, token.IMAG, token.CHAR, or token.STRING
 	switch tok {
 	case token.INT:
@@ -692,7 +751,7 @@ func TokenBasicKind (tok token.Token) types.BasicKind {
 	}
 }
 
-func TokenGoType (tok token.Token) types.Type {
+func TokenGoType(tok token.Token) types.Type {
 	return types.Typ[TokenBasicKind(tok)]
 }
 
@@ -709,7 +768,7 @@ func DumpBasicLit(l *ast.BasicLit, fset *token.FileSet) map[string]interface{} {
 	}, DumpGoType(TokenGoType(l.Kind)))
 }
 
-func AttemptField (f *ast.Field, fset *token.FileSet) map[string]interface{} {
+func AttemptField(f *ast.Field, fset *token.FileSet) map[string]interface{} {
 	if f == nil {
 		return nil
 	} else {
@@ -767,7 +826,7 @@ func DumpCommentGroup(g *ast.CommentGroup, fset *token.FileSet) []string {
 func DumpTypeAlias(ts []*ast.TypeSpec, fset *token.FileSet) map[string]interface{} {
 	binds := make([]interface{}, len(ts))
 	for i, t := range ts {
-		binds[i] = map[string]interface{} {
+		binds[i] = map[string]interface{}{
 			"name":  DumpIdent(t.Name, fset),
 			"value": DumpExprAsType(t.Type, fset),
 		}
@@ -1281,14 +1340,13 @@ func IsImport(d ast.Decl) bool {
 	if decl, ok := d.(*ast.GenDecl); ok {
 		return decl.Tok == token.IMPORT
 	}
-
 	return false
 }
 
 // AST nodes will be decorated with type information provided by the
 // typeinfo argument if it's not nil.
 func DumpFile(f *ast.File, path string, fset *token.FileSet, typeinfo *types.Info) map[string]interface{} {
-	tinfo = typeinfo	
+	tinfo = typeinfo
 	decls := []interface{}{}
 	imps := []interface{}{}
 	if f.Decls != nil {
@@ -1326,6 +1384,40 @@ func DumpFile(f *ast.File, path string, fset *token.FileSet, typeinfo *types.Inf
 		"declarations": decls,
 		"imports":      imps,
 	}
+}
+
+func DumpInitializer(init *types.Initializer, fset *token.FileSet) map[string]interface{} {
+	vars := make([]map[string]interface{}, len(init.Lhs))
+	for i, v := range init.Lhs {
+		ident := ast.Ident{
+			NamePos: v.Pos(),
+			Name:    v.Name(),
+			Obj:     nil,
+		}
+		vars[i] = map[string]interface{}{
+			"kind":     "expression",
+			"type":     "identifier",
+			"value":    DumpIdent(&ident, fset),
+			"position": DumpPosition(fset.Position(v.Pos())),
+		}
+	}
+
+	return map[string]interface{}{
+		"kind":  "statement",
+		"type":  "initializer",
+		"vars":  vars,
+		"value": DumpExpr(init.Rhs, fset),
+	}
+}
+
+// Initializers are dumped on a per-package basis.
+func DumpInitializers(fset *token.FileSet, typeinfo *types.Info) []map[string]interface{} {
+	tinfo = typeinfo
+	initializers := make([]map[string]interface{}, len(tinfo.InitOrder))
+	for i, init := range tinfo.InitOrder {
+		initializers[i] = DumpInitializer(init, fset)
+	}
+	return initializers
 }
 
 func TestExpr(s string) map[string]interface{} {
