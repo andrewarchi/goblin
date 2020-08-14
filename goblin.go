@@ -489,7 +489,7 @@ func DumpConstant(value constant.Value) map[string]interface{} {
 	case constant.String:
 		return map[string]interface{}{
 			"type": "STRING",
-			"value": value.ExactString(),
+			"value": constant.StringVal(value),
 		}
 	case constant.Int:
 		return map[string]interface{}{
