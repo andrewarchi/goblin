@@ -875,7 +875,9 @@ func DumpCall(c *ast.CallExpr, fset *token.FileSet) map[string]interface{} {
 	// declarations, so it's probably more morally-correct, if less helpful, to treat them
 	// as function calls and disambiguate them at a further stage.
 	callee := AttemptExprAsType(c.Fun, fset)
-	if callee != nil && callee["type"] != "identifier" {
+
+	if callee != nil && callee["value"] != nil && (callee["type"] != "identifier" ||
+		callee["value"].(map[string]interface{})["ident-kind"] == "TypeName") {
 		return withType(map[string]interface{}{
 			"kind":       "expression",
 			"type":       "cast",
@@ -884,13 +886,6 @@ func DumpCall(c *ast.CallExpr, fset *token.FileSet) map[string]interface{} {
 			"position":   DumpPosition(fset.Position(c.Pos())),
 		}, tp)
 	}
-
-	// TODO: switch on the actual type here to disambiguate
-	// between calls and casts? until then, the above is necessary
-	// sometimes when the callee won't parse correctly as a normal
-	// expression but only as a type.
-
-	// callee := DumpExpr(c.Fun, fset)
 
 	return withType(map[string]interface{}{
 		"kind":      "expression",
@@ -1090,7 +1085,7 @@ func DumpStmt(s ast.Stmt, fset *token.FileSet) interface{} {
 			"key":       DumpExpr(n.Key, fset),
 			"value":     DumpExpr(n.Value, fset),
 			"target":    DumpExpr(n.X, fset),
-			"is-assign": n.Tok == token.DEFINE,
+			"is-assign": n.Tok == token.ASSIGN,
 			"body":      DumpBlock(n.Body, fset),
 			"position":  DumpPosition(fset.Position(n.Pos())),
 		}
