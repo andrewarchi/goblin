@@ -1,104 +1,104 @@
 {
-   "imports" : [],
-   "name" : {
-      "kind" : "ident",
-      "position" : {
-         "line" : 1,
-         "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-         "offset" : 8,
-         "column" : 9
+  "imports": [],
+  "name": {
+    "kind": "ident",
+    "position": {
+      "line": 1,
+      "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+      "offset": 8,
+      "column": 9
+    },
+    "value": "main"
+  },
+  "kind": "file",
+  "all-comments": [],
+  "declarations": [
+    {
+      "position": {
+        "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+        "line": 3,
+        "offset": 19,
+        "column": 6
       },
-      "value" : "main"
-   },
-   "kind" : "file",
-   "all-comments" : [],
-   "declarations" : [
-      {
-         "position" : {
-            "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-            "line" : 3,
-            "offset" : 19,
-            "column" : 6
-         },
-         "comments" : [],
-         "value" : {
-            "kind" : "type",
-            "type" : "array",
-            "position" : {
-               "line" : 3,
-               "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-               "offset" : 27,
-               "column" : 14
+      "comments": [],
+      "value": {
+        "kind": "type",
+        "type": "array",
+        "position": {
+          "line": 3,
+          "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+          "offset": 27,
+          "column": 14
+        },
+        "length": {
+          "type": "INT",
+          "kind": "literal",
+          "value": "100",
+          "position": {
+            "column": 15,
+            "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+            "line": 3,
+            "offset": 28
+          }
+        },
+        "element": {
+          "value": {
+            "position": {
+              "column": 19,
+              "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+              "line": 3,
+              "offset": 32
             },
-            "length" : {
-               "type" : "INT",
-               "kind" : "literal",
-               "value" : "100",
-               "position" : {
-                  "column" : 15,
-                  "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-                  "line" : 3,
-                  "offset" : 28
-               }
-            },
-            "element" : {
-               "value" : {
-                  "position" : {
-                     "column" : 19,
-                     "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-                     "line" : 3,
-                     "offset" : 32
-                  },
-                  "value" : "int",
-                  "kind" : "ident"
-               },
-               "position" : {
-                  "column" : 19,
-                  "offset" : 32,
-                  "line" : 3,
-                  "filename" : "fixtures/packages/simpletypealias/simpletypealias.go"
-               },
-               "type" : "identifier",
-               "kind" : "type"
-            }
-         },
-         "kind" : "decl",
-         "name" : {
-            "kind" : "ident",
-            "value" : "MyArray",
-            "position" : {
-               "offset" : 19,
-               "line" : 3,
-               "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-               "column" : 6
-            }
-         },
-         "type" : "type-alias"
+            "value": "int",
+            "kind": "ident"
+          },
+          "position": {
+            "column": 19,
+            "offset": 32,
+            "line": 3,
+            "filename": "fixtures/packages/simpletypealias/simpletypealias.go"
+          },
+          "type": "identifier",
+          "kind": "type"
+        }
       },
-      {
-         "body" : [],
-         "position" : {
-            "column" : 1,
-            "line" : 5,
-            "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-            "offset" : 37
-         },
-         "params" : [],
-         "results" : null,
-         "comments" : [],
-         "name" : {
-            "kind" : "ident",
-            "value" : "main",
-            "position" : {
-               "column" : 6,
-               "offset" : 42,
-               "filename" : "fixtures/packages/simpletypealias/simpletypealias.go",
-               "line" : 5
-            }
-         },
-         "type" : "function",
-         "kind" : "decl"
-      }
-   ],
-   "comments" : []
+      "kind": "decl",
+      "name": {
+        "kind": "ident",
+        "value": "MyArray",
+        "position": {
+          "offset": 19,
+          "line": 3,
+          "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+          "column": 6
+        }
+      },
+      "type": "type-alias"
+    },
+    {
+      "body": [],
+      "position": {
+        "column": 1,
+        "line": 5,
+        "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+        "offset": 37
+      },
+      "params": [],
+      "results": null,
+      "comments": [],
+      "name": {
+        "kind": "ident",
+        "value": "main",
+        "position": {
+          "column": 6,
+          "offset": 42,
+          "filename": "fixtures/packages/simpletypealias/simpletypealias.go",
+          "line": 5
+        }
+      },
+      "type": "function",
+      "kind": "decl"
+    }
+  ],
+  "comments": []
 }

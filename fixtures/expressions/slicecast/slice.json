@@ -1,60 +1,60 @@
 {
-   "type" : "cast",
-   "target" : {
-      "value" : {
-         "position" : {
-            "filename" : "",
-            "offset" : 0,
-            "column" : 0,
-            "line" : 0
-         },
-         "kind" : "ident",
-         "value" : "foo"
+  "type": "cast",
+  "target": {
+    "value": {
+      "position": {
+        "filename": "",
+        "offset": 0,
+        "column": 0,
+        "line": 0
       },
-      "type" : "identifier",
-      "position" : {
-         "line" : 0,
-         "column" : 0,
-         "offset" : 0,
-         "filename" : ""
+      "kind": "ident",
+      "value": "foo"
+    },
+    "type": "identifier",
+    "position": {
+      "line": 0,
+      "column": 0,
+      "offset": 0,
+      "filename": ""
+    },
+    "kind": "expression"
+  },
+  "position": {
+    "column": 0,
+    "line": 0,
+    "filename": "",
+    "offset": 0
+  },
+  "kind": "expression",
+  "coerced-to": {
+    "element": {
+      "type": "identifier",
+      "value": {
+        "value": "int",
+        "kind": "ident",
+        "position": {
+          "offset": 0,
+          "filename": "",
+          "line": 0,
+          "column": 0
+        }
       },
-      "kind" : "expression"
-   },
-   "position" : {
-      "column" : 0,
-      "line" : 0,
-      "filename" : "",
-      "offset" : 0
-   },
-   "kind" : "expression",
-   "coerced-to" : {
-      "element" : {
-         "type" : "identifier",
-         "value" : {
-            "value" : "int",
-            "kind" : "ident",
-            "position" : {
-               "offset" : 0,
-               "filename" : "",
-               "line" : 0,
-               "column" : 0
-            }
-         },
-         "position" : {
-            "offset" : 0,
-            "filename" : "",
-            "line" : 0,
-            "column" : 0
-         },
-         "kind" : "type"
+      "position": {
+        "offset": 0,
+        "filename": "",
+        "line": 0,
+        "column": 0
       },
-      "type" : "slice",
-      "kind" : "type",
-      "position" : {
-         "filename" : "",
-         "offset" : 0,
-         "column" : 0,
-         "line" : 0
-      }
-   }
+      "kind": "type"
+    },
+    "type": "slice",
+    "kind": "type",
+    "position": {
+      "filename": "",
+      "offset": 0,
+      "column": 0,
+      "line": 0
+    }
+  }
 }

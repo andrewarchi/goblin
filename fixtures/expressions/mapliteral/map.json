@@ -1,140 +1,140 @@
 {
-   "values" : [
-      {
-         "type" : "key-value",
-         "value" : {
-            "position" : {
-               "column" : 0,
-               "line" : 0,
-               "offset" : 0,
-               "filename" : ""
-            },
-            "type" : "INT",
-            "value" : "1989",
-            "kind" : "literal"
-         },
-         "kind" : "expression",
-         "key" : {
-            "position" : {
-               "column" : 0,
-               "offset" : 0,
-               "filename" : "",
-               "line" : 0
-            },
-            "value" : "\"Bleach\"",
-            "type" : "STRING",
-            "kind" : "literal"
-         }
+  "values": [
+    {
+      "type": "key-value",
+      "value": {
+        "position": {
+          "column": 0,
+          "line": 0,
+          "offset": 0,
+          "filename": ""
+        },
+        "type": "INT",
+        "value": "1989",
+        "kind": "literal"
       },
-      {
-         "value" : {
-            "position" : {
-               "line" : 0,
-               "filename" : "",
-               "offset" : 0,
-               "column" : 0
-            },
-            "value" : "1991",
-            "type" : "INT",
-            "kind" : "literal"
-         },
-         "type" : "key-value",
-         "key" : {
-            "position" : {
-               "column" : 0,
-               "line" : 0,
-               "offset" : 0,
-               "filename" : ""
-            },
-            "type" : "STRING",
-            "value" : "\"Nevermind\"",
-            "kind" : "literal"
-         },
-         "kind" : "expression"
-      },
-      {
-         "value" : {
-            "type" : "INT",
-            "value" : "1993",
-            "position" : {
-               "line" : 0,
-               "filename" : "",
-               "offset" : 0,
-               "column" : 0
-            },
-            "kind" : "literal"
-         },
-         "type" : "key-value",
-         "key" : {
-            "kind" : "literal",
-            "value" : "\"In Utero\"",
-            "type" : "STRING",
-            "position" : {
-               "column" : 0,
-               "line" : 0,
-               "offset" : 0,
-               "filename" : ""
-            }
-         },
-         "kind" : "expression"
+      "kind": "expression",
+      "key": {
+        "position": {
+          "column": 0,
+          "offset": 0,
+          "filename": "",
+          "line": 0
+        },
+        "value": "\"Bleach\"",
+        "type": "STRING",
+        "kind": "literal"
       }
-   ],
-   "kind" : "literal",
-   "declared" : {
-      "position" : {
-         "offset" : 0,
-         "filename" : "",
-         "line" : 0,
-         "column" : 0
+    },
+    {
+      "value": {
+        "position": {
+          "line": 0,
+          "filename": "",
+          "offset": 0,
+          "column": 0
+        },
+        "value": "1991",
+        "type": "INT",
+        "kind": "literal"
       },
-      "type" : "map",
-      "value" : {
-         "value" : {
-            "kind" : "ident",
-            "position" : {
-               "line" : 0,
-               "filename" : "",
-               "offset" : 0,
-               "column" : 0
-            },
-            "value" : "int8"
-         },
-         "type" : "identifier",
-         "position" : {
-            "column" : 0,
-            "line" : 0,
-            "filename" : "",
-            "offset" : 0
-         },
-         "kind" : "type"
+      "type": "key-value",
+      "key": {
+        "position": {
+          "column": 0,
+          "line": 0,
+          "offset": 0,
+          "filename": ""
+        },
+        "type": "STRING",
+        "value": "\"Nevermind\"",
+        "kind": "literal"
       },
-      "key" : {
-         "type" : "identifier",
-         "value" : {
-            "value" : "string",
-            "position" : {
-               "column" : 0,
-               "offset" : 0,
-               "filename" : "",
-               "line" : 0
-            },
-            "kind" : "ident"
-         },
-         "position" : {
-            "filename" : "",
-            "offset" : 0,
-            "line" : 0,
-            "column" : 0
-         },
-         "kind" : "type"
+      "kind": "expression"
+    },
+    {
+      "value": {
+        "type": "INT",
+        "value": "1993",
+        "position": {
+          "line": 0,
+          "filename": "",
+          "offset": 0,
+          "column": 0
+        },
+        "kind": "literal"
       },
-      "kind" : "type"
-   },
-   "type" : "composite",
-   "position" : {
-      "column" : 0,
-      "line" : 0,
-      "filename" : "",
-      "offset" : 0
-   }
+      "type": "key-value",
+      "key": {
+        "kind": "literal",
+        "value": "\"In Utero\"",
+        "type": "STRING",
+        "position": {
+          "column": 0,
+          "line": 0,
+          "offset": 0,
+          "filename": ""
+        }
+      },
+      "kind": "expression"
+    }
+  ],
+  "kind": "literal",
+  "declared": {
+    "position": {
+      "offset": 0,
+      "filename": "",
+      "line": 0,
+      "column": 0
+    },
+    "type": "map",
+    "value": {
+      "value": {
+        "kind": "ident",
+        "position": {
+          "line": 0,
+          "filename": "",
+          "offset": 0,
+          "column": 0
+        },
+        "value": "int8"
+      },
+      "type": "identifier",
+      "position": {
+        "column": 0,
+        "line": 0,
+        "filename": "",
+        "offset": 0
+      },
+      "kind": "type"
+    },
+    "key": {
+      "type": "identifier",
+      "value": {
+        "value": "string",
+        "position": {
+          "column": 0,
+          "offset": 0,
+          "filename": "",
+          "line": 0
+        },
+        "kind": "ident"
+      },
+      "position": {
+        "filename": "",
+        "offset": 0,
+        "line": 0,
+        "column": 0
+      },
+      "kind": "type"
+    },
+    "kind": "type"
+  },
+  "type": "composite",
+  "position": {
+    "column": 0,
+    "line": 0,
+    "filename": "",
+    "offset": 0
+  }
 }

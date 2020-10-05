@@ -1,79 +1,79 @@
 {
-   "declarations" : [
-      {
-         "position" : {
-            "filename" : "fixtures/packages/select/select.go",
-            "column" : 1,
-            "offset" : 14,
-            "line" : 3
-         },
-         "type" : "function",
-         "results" : null,
-         "params" : [],
-         "name" : {
-            "kind" : "ident",
-            "position" : {
-               "filename" : "fixtures/packages/select/select.go",
-               "offset" : 19,
-               "column" : 6,
-               "line" : 3
-            },
-            "value" : "main"
-         },
-         "kind" : "decl",
-         "body" : [
-            {
-               "type" : "select",
-               "position" : {
-                  "line" : 4,
-                  "filename" : "fixtures/packages/select/select.go",
-                  "offset" : 29,
-                  "column" : 2
-               },
-               "body" : [
-                  {
-                     "statement" : null,
-                     "body" : [
-                        {
-                           "position" : {
-                              "line" : 6,
-                              "offset" : 50,
-                              "column" : 3,
-                              "filename" : "fixtures/packages/select/select.go"
-                           },
-                           "type" : "return",
-                           "kind" : "statement",
-                           "values" : []
-                        }
-                     ],
-                     "kind" : "statement",
-                     "type" : "select-clause",
-                     "position" : {
-                        "column" : 2,
-                        "offset" : 39,
-                        "filename" : "fixtures/packages/select/select.go",
-                        "line" : 5
-                     }
-                  }
-               ],
-               "kind" : "statement"
-            }
-         ],
-         "comments" : []
-      }
-   ],
-   "name" : {
-      "value" : "main",
-      "position" : {
-         "line" : 1,
-         "column" : 9,
-         "offset" : 8,
-         "filename" : "fixtures/packages/select/select.go"
+  "declarations": [
+    {
+      "position": {
+        "filename": "fixtures/packages/select/select.go",
+        "column": 1,
+        "offset": 14,
+        "line": 3
       },
-      "kind" : "ident"
-   },
-   "imports" : [],
-   "all-comments" : [],
-   "kind" : "file",
-   "comments" : []
+      "type": "function",
+      "results": null,
+      "params": [],
+      "name": {
+        "kind": "ident",
+        "position": {
+          "filename": "fixtures/packages/select/select.go",
+          "offset": 19,
+          "column": 6,
+          "line": 3
+        },
+        "value": "main"
+      },
+      "kind": "decl",
+      "body": [
+        {
+          "type": "select",
+          "position": {
+            "line": 4,
+            "filename": "fixtures/packages/select/select.go",
+            "offset": 29,
+            "column": 2
+          },
+          "body": [
+            {
+              "statement": null,
+              "body": [
+                {
+                  "position": {
+                    "line": 6,
+                    "offset": 50,
+                    "column": 3,
+                    "filename": "fixtures/packages/select/select.go"
+                  },
+                  "type": "return",
+                  "kind": "statement",
+                  "values": []
+                }
+              ],
+              "kind": "statement",
+              "type": "select-clause",
+              "position": {
+                "column": 2,
+                "offset": 39,
+                "filename": "fixtures/packages/select/select.go",
+                "line": 5
+              }
+            }
+          ],
+          "kind": "statement"
+        }
+      ],
+      "comments": []
+    }
+  ],
+  "name": {
+    "value": "main",
+    "position": {
+      "line": 1,
+      "column": 9,
+      "offset": 8,
+      "filename": "fixtures/packages/select/select.go"
+    },
+    "kind": "ident"
+  },
+  "imports": [],
+  "all-comments": [],
+  "kind": "file",
+  "comments": []
 }

@@ -2,3 +2,4 @@ goblin
 cover.html
 cover.out
 .DS_Store
+*.got.json

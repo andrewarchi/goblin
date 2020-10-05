@@ -1,67 +1,67 @@
 {
-   "imports" : [],
-   "all-comments" : [],
-   "comments" : [],
-   "declarations" : [
-      {
-         "kind" : "decl",
-         "specs" : [
+  "imports": [],
+  "all-comments": [],
+  "comments": [],
+  "declarations": [
+    {
+      "kind": "decl",
+      "specs": [
+        {
+          "type": "var",
+          "names": [
             {
-               "type" : "var",
-               "names" : [
-                  {
-                     "kind" : "ident",
-                     "position" : {
-                        "line" : 3,
-                        "column" : 5,
-                        "offset" : 15,
-                        "filename" : "fixtures/packages/untypedvar/untyped.go"
-                     },
-                     "value" : "a"
-                  }
-               ],
-               "kind" : "spec",
-               "declared-type" : null,
-               "values" : [
-                  {
-                     "type" : "INT",
-                     "value" : "1",
-                     "position" : {
-                        "line" : 3,
-                        "column" : 9,
-                        "offset" : 19,
-                        "filename" : "fixtures/packages/untypedvar/untyped.go"
-                     },
-                     "kind" : "literal"
-                  }
-               ],
-               "position" : {
-                  "offset" : 15,
-                  "filename" : "fixtures/packages/untypedvar/untyped.go",
-                  "line" : 3,
-                  "column" : 5
-               },
-               "comments" : []
+              "kind": "ident",
+              "position": {
+                "line": 3,
+                "column": 5,
+                "offset": 15,
+                "filename": "fixtures/packages/untypedvar/untyped.go"
+              },
+              "value": "a"
             }
-         ],
-         "position" : {
-            "offset" : 11,
-            "filename" : "fixtures/packages/untypedvar/untyped.go",
-            "line" : 3,
-            "column" : 1
-         },
-         "type" : "var"
-      }
-   ],
-   "kind" : "file",
-   "name" : {
-      "value" : "p",
-      "kind" : "ident",
-      "position" : {
-         "column" : 9,
-         "line" : 1,
-         "filename" : "fixtures/packages/untypedvar/untyped.go",
-         "offset" : 8
-      }
-   }
+          ],
+          "kind": "spec",
+          "declared-type": null,
+          "values": [
+            {
+              "type": "INT",
+              "value": "1",
+              "position": {
+                "line": 3,
+                "column": 9,
+                "offset": 19,
+                "filename": "fixtures/packages/untypedvar/untyped.go"
+              },
+              "kind": "literal"
+            }
+          ],
+          "position": {
+            "offset": 15,
+            "filename": "fixtures/packages/untypedvar/untyped.go",
+            "line": 3,
+            "column": 5
+          },
+          "comments": []
+        }
+      ],
+      "position": {
+        "offset": 11,
+        "filename": "fixtures/packages/untypedvar/untyped.go",
+        "line": 3,
+        "column": 1
+      },
+      "type": "var"
+    }
+  ],
+  "kind": "file",
+  "name": {
+    "value": "p",
+    "kind": "ident",
+    "position": {
+      "column": 9,
+      "line": 1,
+      "filename": "fixtures/packages/untypedvar/untyped.go",
+      "offset": 8
+    }
+  }
 }

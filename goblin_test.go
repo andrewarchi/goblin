@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"testing/quick"
 )
@@ -17,9 +19,9 @@ import (
 func TestRoundTripFloat(t *testing.T) {
 	f := func(flt float64) bool {
 		flt = math.Abs(flt)
-		needed := fmt.Sprintf("%f", flt)
-		gotten := TestExpr(needed)
-		result, _ := strconv.ParseFloat(gotten["value"].(string), 64)
+		want := fmt.Sprintf("%f", flt)
+		got := TestExpr(want)
+		result, _ := strconv.ParseFloat(got["value"].(string), 64)
 		return flt == result
 	}
 
@@ -84,26 +86,25 @@ func TestPackageFixtures(t *testing.T) {
 	}
 
 	for _, fix := range fixtures {
-		gotten := TestFile(fix.goPath)
-		needed, _ := ioutil.ReadFile(fix.jsonPath)
+		got := TestFile(fix.goPath)
+		want, _ := ioutil.ReadFile(fix.jsonPath)
 
-		var gottenJ, neededJ interface{}
+		var gotJ, wantJ interface{}
 
-		err := json.Unmarshal(gotten, &gottenJ)
+		err := json.Unmarshal(got, &gotJ)
 		if err != nil {
-			panic("error reading " + fix.goPath + ": " + err.Error())
+			t.Fatalf("error reading %s: %v", fix.goPath, err)
 		}
 
-		err = json.Unmarshal(needed, &neededJ)
+		err = json.Unmarshal(want, &wantJ)
 		if err != nil {
-			panic("error reading " + fix.jsonPath + ": " + err.Error())
+			t.Fatalf("error reading %s: %v", fix.jsonPath, err)
 		}
 
-		t.Run(fix.name, func(tt *testing.T) {
-			if !reflect.DeepEqual(gottenJ, neededJ) {
-				t.Error("equality comparison failed!")
-			}
-		})
+		if !reflect.DeepEqual(gotJ, wantJ) {
+			t.Errorf("equality comparison failed: %s", fix.name)
+			dumpFail(t, fix, gotJ)
+		}
 	}
 }
 
@@ -152,77 +153,90 @@ func TestExpressionFixtures(t *testing.T) {
 	}
 
 	for _, fix := range fixtures {
-		gottenText, _ := ioutil.ReadFile(fix.goPath)
-		gotten := TestExpr(string(gottenText))
-		needed, _ := ioutil.ReadFile(fix.jsonPath)
+		gotBytes, _ := ioutil.ReadFile(fix.goPath)
+		got := TestExpr(string(gotBytes))
+		want, _ := ioutil.ReadFile(fix.jsonPath)
 
-		var neededJ interface{}
+		var wantJ interface{}
 
-		err := json.Unmarshal(needed, &neededJ)
+		err := json.Unmarshal(want, &wantJ)
 		if err != nil {
-			panic("error reading " + fix.jsonPath + ": " + err.Error())
+			t.Fatalf("error reading %s: %v", fix.jsonPath, err)
 		}
 
-		t.Run(fix.name, func(tt *testing.T) {
-			if !reflect.DeepEqual(gotten, neededJ) {
-				t.Error("equality comparison failed!")
-			}
-		})
+		if !reflect.DeepEqual(got, wantJ) {
+			t.Errorf("equality comparison failed: %s", fix.name)
+			dumpFail(t, fix, got)
+		}
 	}
 }
 
 func TestIota(t *testing.T) {
-	gotten := TestExpr("iota")
-	val := gotten["value"].(map[string]interface{})
+	got := TestExpr("iota")
+	val := got["value"].(map[string]interface{})
 	if val["type"] != "IOTA" {
 		t.Error("Didn't parse iota as a literal")
 	}
-
 }
 
 func TestTrue(t *testing.T) {
-	gotten := TestExpr("true")
-	if gotten["type"] != "BOOL" || gotten["value"] != "true" {
+	got := TestExpr("true")
+	if got["type"] != "BOOL" || got["value"] != "true" {
 		t.Error("Didn't parse 'true' as true")
 	}
 }
 
 func TestFalse(t *testing.T) {
-	gotten := TestExpr("false")
-	if gotten["type"] != "BOOL" || gotten["value"] != "false" {
+	got := TestExpr("false")
+	if got["type"] != "BOOL" || got["value"] != "false" {
 		t.Error("Didn't parse 'false' as false")
 	}
 }
 
 func TestProvidedImag(t *testing.T) {
-	gotten := TestExpr("1.414i")
-	if gotten["type"] != "IMAG" || gotten["value"] != "1.414i" {
+	got := TestExpr("1.414i")
+	if got["type"] != "IMAG" || got["value"] != "1.414i" {
 		t.Error("Imaginary numbers not parsing correctly")
 	}
 }
 
 func TestProvidedFloat(t *testing.T) {
-	gotten := TestExpr("3.14")
-	if gotten["value"].(string) != "3.14" {
+	got := TestExpr("3.14")
+	if got["value"].(string) != "3.14" {
 		t.Error("Floats not parsing correctly")
 	}
 }
 
 func TestCall(t *testing.T) {
-	gotten := TestExpr("foo(bar)")
-	if gotten["type"].(string) != "call" {
+	got := TestExpr("foo(bar)")
+	if got["type"].(string) != "call" {
 		t.Error("Function calls not parsing correctly")
 	}
 }
 
 func TestRoundTripUInt(t *testing.T) {
-	f := func(int uint64) bool {
-		needed := fmt.Sprintf("%d", int)
-		gotten := TestExpr(needed)
-		return needed == gotten["value"]
+	f := func(ui uint64) bool {
+		want := fmt.Sprintf("%d", ui)
+		got := TestExpr(want)
+		return want == got["value"]
 	}
 
 	if err := quick.Check(f, nil); err != nil {
+		t.Error(err)
+	}
+}
+
+func dumpFail(t *testing.T, fix Fixture, got interface{}) {
+	t.Helper()
+	f, err := os.Create(strings.TrimSuffix(fix.jsonPath, ".json") + ".got.json")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer f.Close()
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(got); err != nil {
 		t.Error(err)
 	}
 }

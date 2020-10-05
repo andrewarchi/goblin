@@ -1,33 +1,33 @@
 {
-   "type" : "expression",
-   "right" : {
-      "position" : {
-         "offset" : 0,
-         "column" : 0,
-         "line" : 0,
-         "filename" : ""
-      },
-      "value" : "true",
-      "type" : "BOOL",
-      "kind" : "literal"
-   },
-   "position" : {
-      "column" : 0,
-      "offset" : 0,
-      "filename" : "",
-      "line" : 0
-   },
-   "left" : {
-      "position" : {
-         "offset" : 0,
-         "column" : 0,
-         "filename" : "",
-         "line" : 0
-      },
-      "value" : "false",
-      "type" : "BOOL",
-      "kind" : "literal"
-   },
-   "operator" : "||",
-   "kind" : "binary"
+  "type": "expression",
+  "right": {
+    "position": {
+      "offset": 0,
+      "column": 0,
+      "line": 0,
+      "filename": ""
+    },
+    "value": "true",
+    "type": "BOOL",
+    "kind": "literal"
+  },
+  "position": {
+    "column": 0,
+    "offset": 0,
+    "filename": "",
+    "line": 0
+  },
+  "left": {
+    "position": {
+      "offset": 0,
+      "column": 0,
+      "filename": "",
+      "line": 0
+    },
+    "value": "false",
+    "type": "BOOL",
+    "kind": "literal"
+  },
+  "operator": "||",
+  "kind": "binary"
 }
