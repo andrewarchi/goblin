@@ -81,11 +81,10 @@ func ConvertChanDir(dir types.ChanDir) ast.ChanDir {
 }
 
 func getGoType(e ast.Expr) map[string]interface{} {
-	if tinfo != nil {
-		return DumpGoType(tinfo.Types[e].Type)
-	} else {
+	if tinfo == nil {
 		return nil
 	}
+	return DumpGoType(tinfo.Types[e].Type)
 }
 
 // Impose a depth limit for now until we can detect and handle
@@ -301,14 +300,14 @@ func AttemptExprAsType(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 	if n, ok := e.(*ast.SelectorExpr); ok {
 		lhs := DumpExpr(n.X, fset)
 
-		is_type := false
+		isType := false
 		if tinfo != nil {
-			is_type = IdentKind(n.Sel) == "TypeName"
+			isType = IdentKind(n.Sel) == "TypeName"
 		} else {
-			is_type = lhs["type"] == "identifier" && lhs["qualifier"] == nil
+			isType = lhs["type"] == "identifier" && lhs["qualifier"] == nil
 		}
 
-		if is_type {
+		if isType {
 			return withType(map[string]interface{}{
 				"kind":      "type",
 				"type":      "identifier",
@@ -327,15 +326,15 @@ func AttemptExprAsType(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 				"element":  DumpExprAsType(n.Elt, fset),
 				"position": DumpPosition(fset.Position(e.Pos())),
 			}, tp)
-		} else {
-			return withType(map[string]interface{}{
-				"kind":     "type",
-				"type":     "array",
-				"element":  DumpExprAsType(n.Elt, fset),
-				"length":   DumpExpr(n.Len, fset),
-				"position": DumpPosition(fset.Position(e.Pos())),
-			}, tp)
 		}
+
+		return withType(map[string]interface{}{
+			"kind":     "type",
+			"type":     "array",
+			"element":  DumpExprAsType(n.Elt, fset),
+			"length":   DumpExpr(n.Len, fset),
+			"position": DumpPosition(fset.Position(e.Pos())),
+		}, tp)
 	}
 
 	if n, ok := e.(*ast.StarExpr); ok {
@@ -440,7 +439,7 @@ func DumpChanDir(d ast.ChanDir) string {
 		return "both"
 	}
 
-	Perish(INVALID_POSITION, "internal_error", string(d))
+	Perish(INVALID_POSITION, "internal_error", fmt.Sprint(d))
 	panic("unreachable")
 }
 

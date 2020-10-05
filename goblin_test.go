@@ -36,42 +36,47 @@ type Fixture struct {
 
 func TestPackageFixtures(t *testing.T) {
 	fixtures := []Fixture{
-		Fixture{"helloworld",
+		{
+			"helloworld",
 			"fixtures/packages/helloworld/helloworld.go",
 			"fixtures/packages/helloworld/helloworld.json",
 		},
-		Fixture{"simple type alias",
+		{
+			"simple type alias",
 			"fixtures/packages/simpletypealias/simpletypealias.go",
 			"fixtures/packages/simpletypealias/simpletypealias.json",
 		},
-		Fixture{"untyped top-level variable",
+		{
+			"untyped top-level variable",
 			"fixtures/packages/untypedvar/untyped.go",
 			"fixtures/packages/untypedvar/untyped.json",
 		},
-		Fixture{"qualified type in function argument",
+		{
+			"qualified type in function argument",
 			"fixtures/packages/qualifiedtype/qualified.go",
 			"fixtures/packages/qualifiedtype/qualified.json",
 		},
-		Fixture{"infinite for-loop",
+		{
+			"infinite for-loop",
 			"fixtures/packages/emptyfor/empty.go",
 			"fixtures/packages/emptyfor/empty.json",
 		},
-		Fixture{
+		{
 			"select statement",
 			"fixtures/packages/select/select.go",
 			"fixtures/packages/select/select.json",
 		},
-		Fixture{
+		{
 			"method declaration",
 			"fixtures/packages/methoddecl/method.go",
 			"fixtures/packages/methoddecl/method.json",
 		},
-		Fixture{
+		{
 			"map with interface type",
 			"fixtures/packages/interface_type/interface.go",
 			"fixtures/packages/interface_type/interface.json",
 		},
-		Fixture{
+		{
 			"empty function",
 			"fixtures/packages/emptyfunc/empty.go",
 			"fixtures/packages/emptyfunc/empty.json",
@@ -104,42 +109,42 @@ func TestPackageFixtures(t *testing.T) {
 
 func TestExpressionFixtures(t *testing.T) {
 	fixtures := []Fixture{
-		Fixture{
+		{
 			"cast to array",
 			"fixtures/expressions/slicecast/slice.go.txt",
 			"fixtures/expressions/slicecast/slice.json",
 		},
-		Fixture{
+		{
 			"cast to pointer",
 			"fixtures/expressions/ptrcast/ptr.go.txt",
 			"fixtures/expressions/ptrcast/ptr.json",
 		},
-		Fixture{
+		{
 			"map literal",
 			"fixtures/expressions/mapliteral/map.go.txt",
 			"fixtures/expressions/mapliteral/map.json",
 		},
-		Fixture{
+		{
 			"single qualifier",
 			"fixtures/expressions/singlequalifier/single.go.txt",
 			"fixtures/expressions/singlequalifier/single.json",
 		},
-		Fixture{
+		{
 			"double qualifier",
 			"fixtures/expressions/doublequalifier/double.go.txt",
 			"fixtures/expressions/doublequalifier/double.json",
 		},
-		Fixture{
+		{
 			"cast to chan",
 			"fixtures/expressions/chancast/chan.go.txt",
 			"fixtures/expressions/chancast/chan.json",
 		},
-		Fixture{
+		{
 			"cast with parenthesized type",
 			"fixtures/expressions/parenintype/paren.go.txt",
 			"fixtures/expressions/parenintype/paren.json",
 		},
-		Fixture{
+		{
 			"adding two identifiers",
 			"fixtures/expressions/addition/addition.go.txt",
 			"fixtures/expressions/addition/addition.json",
