@@ -7,8 +7,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
 	"log"
+	"os"
 )
 
 // Assuming you build with `make`, this variable will be filled in automatically
@@ -35,11 +35,11 @@ func main() {
 		println(version)
 		return
 	} else if *fileFlag != "" {
-		// If full, use Load 
+		// If full, use Load
 		if *fullFlag {
 			o := goblin.Load(*fileFlag)
 			str, err := json.Marshal(o)
-			if (err != nil) {
+			if err != nil {
 				log.Fatal(err)
 			}
 			os.Stdout.Write(str)
@@ -52,17 +52,17 @@ func main() {
 			if err != nil {
 				goblin.Perish(goblin.TOPLEVEL_POSITION, "path_error", err.Error())
 			}
-			
+
 			size := info.Size()
 			file.Close()
-			
+
 			fset.AddFile(*fileFlag, -1, int(size))
-			
+
 			f, err := parser.ParseFile(fset, *fileFlag, nil, parser.ParseComments)
 			if err != nil {
 				goblin.Perish(goblin.INVALID_POSITION, "positionless_syntax_error", err.Error())
 			}
-			
+
 			if *builtinDumpFlag {
 				ast.Print(fset, f)
 			} else {
@@ -80,4 +80,3 @@ func main() {
 		flag.PrintDefaults()
 	}
 }
-

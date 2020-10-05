@@ -483,29 +483,29 @@ func DumpConstant(value constant.Value) map[string]interface{} {
 	switch value.Kind() {
 	case constant.Bool:
 		return map[string]interface{}{
-			"type": "BOOL",
+			"type":  "BOOL",
 			"value": value.ExactString(),
 		}
 	case constant.String:
 		return map[string]interface{}{
-			"type": "STRING",
+			"type":  "STRING",
 			"value": constant.StringVal(value),
 		}
 	case constant.Int:
 		return map[string]interface{}{
-			"type": "INT",
+			"type":  "INT",
 			"value": value.ExactString(),
 		}
 	case constant.Float:
 		return map[string]interface{}{
-			"type": "FLOAT",
-			"numerator": DumpConstant(constant.Num(value)),
+			"type":        "FLOAT",
+			"numerator":   DumpConstant(constant.Num(value)),
 			"denominator": DumpConstant(constant.Denom(value)),
 		}
 	case constant.Complex:
 		return map[string]interface{}{
-			"type": "COMPLEX",
-			"numerator": DumpConstant(constant.Num(value)),
+			"type":        "COMPLEX",
+			"numerator":   DumpConstant(constant.Num(value)),
 			"denominator": DumpConstant(constant.Denom(value)),
 		}
 	case constant.Unknown:
@@ -514,7 +514,6 @@ func DumpConstant(value constant.Value) map[string]interface{} {
 	}
 	return nil
 }
-
 
 func DumpExpr(e ast.Expr, fset *token.FileSet) map[string]interface{} {
 	if e == nil {

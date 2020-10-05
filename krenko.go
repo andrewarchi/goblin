@@ -2,11 +2,11 @@ package goblin
 
 import (
 	"fmt"
-	"go/token"
-	"go/parser"
-	"go/types"
 	"go/ast"
 	"go/importer"
+	"go/parser"
+	"go/token"
+	"go/types"
 	"golang.org/x/tools/go/packages"
 	"log"
 	"os"
@@ -138,7 +138,6 @@ func DumpPackage(pkg *packages.Package) map[string]interface{} {
 	for i, f := range pkg.Syntax {
 		files[i] = DumpFile(f, pkg.GoFiles[i], pkg.Fset, pkg.TypesInfo)
 	}
-
 
 	return map[string]interface{}{
 		"name":         pkg.Name,
